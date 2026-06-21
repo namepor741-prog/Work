@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+<title>บันทึกเวลาทำงาน · 勤務ノート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Thai+2:wght@500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   ระบบสี — โทนรุ่งสางหลังเลิกกะดึก + รองรับโหมดมืด (Dark mode)
+   ============================================================ */
+:root, [data-theme="light"]{
+  --bg:#F4F2FB; --surface:#FFFFFF; --surface-2:#FAF9FF; --line:#ECE8F6;
+  --ink:#2D2A44; --ink-2:#5C5876; --ink-3:#938EAC;
+  --peri:#6E73E6; --peri-700:#565BD6; --peri-soft:#E9EAFC;
+  --mint:#12B49A; --mint-soft:#DAF3EE;
+  --peach:#FF9E78; --peach-soft:#FFEADE;
+  --amber:#E2982F; --amber-soft:#FAEDD3;
+  --coral:#E0625A; --coral-soft:#FBE6E4;
+  --danger:#E0625A; --danger-soft:#FBE6E4;
+  --shadow:0 8px 28px rgba(78,72,128,.12), 0 2px 8px rgba(78,72,128,.06);
+  --shadow-sm:0 2px 12px rgba(78,72,128,.08);
+}
+[data-theme="dark"]{
+  --bg:#15131F; --surface:#211E2E; --surface-2:#1A1827; --line:#322E42;
+  --ink:#EDEAF6; --ink-2:#B0AAC6; --ink-3:#7E7894;
+  --peri:#8B90F0; --peri-700:#A0A4F4; --peri-soft:#2A2A45;
+  --mint:#3DD6BC; --mint-soft:#163530;
+  --peach:#FFAE8C; --peach-soft:#3A2A22;
+  --amber:#F0B45A; --amber-soft:#3A2F1A;
+  --coral:#F0817A; --coral-soft:#3A2020;
+  --danger:#F0817A; --danger-soft:#3A2020;
+  --shadow:0 8px 28px rgba(0,0,0,.4), 0 2px 8px rgba(0,0,0,.25);
+  --shadow-sm:0 2px 12px rgba(0,0,0,.3);
+}
+:root{ --radius:22px; --radius-sm:15px; --radius-xs:11px; }
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:'Noto Sans Thai',system-ui,sans-serif; color:var(--ink);
+  background:var(--bg); min-height:100vh; line-height:1.5; -webkit-font-smoothing:antialiased;
+  transition:background .3s, color .3s;
+}
+[data-theme="light"] body{ background:linear-gradient(180deg,#FBF2EE 0%,var(--bg) 20%,var(--bg) 100%); background-attachment:fixed; }
+h1,h2,h3,.num{font-family:'Baloo Thai 2',sans-serif;}
+.jp{ display:block; font-family:'Zen Maru Gothic','Noto Sans JP',sans-serif; font-size:.7rem; font-weight:500; color:var(--ink-3); line-height:1.2; letter-spacing:.3px; margin-bottom:1px; }
+.wrap{max-width:600px;margin:0 auto;padding:18px 15px 96px;}
+
+/* ---------- Header ---------- */
+.topbar{ display:flex;align-items:center;justify-content:space-between;margin:6px 2px 14px; }
+.brand-mini{ display:flex;flex-direction:column; }
+.brand-eyebrow{ display:inline-flex;align-items:center;gap:5px;font-size:.72rem;font-weight:600;color:var(--peri-700); }
+.brand-mini h1{ font-size:1.4rem;font-weight:800;color:var(--ink);line-height:1.1;margin-top:1px; }
+.top-actions{ display:flex;gap:8px; }
+.icon-btn{ width:42px;height:42px;border:1px solid var(--line);background:var(--surface);border-radius:13px;
+  font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;color:var(--ink-2); }
+.icon-btn:hover{ background:var(--surface-2);border-color:var(--peri-soft); }
+.icon-btn:active{ transform:scale(.93); }
+
+/* ---------- การ์ดทั่วไป ---------- */
+.card{ background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:15px; }
+
+/* ---------- แบนเนอร์ disclaimer ---------- */
+.disclaimer{ background:var(--peri-soft);border:1px solid transparent;border-radius:var(--radius-sm);
+  padding:11px 14px;margin-bottom:15px;font-size:.8rem;color:var(--ink-2);display:flex;gap:9px;line-height:1.5; }
+.disclaimer b{ color:var(--peri-700); }
+
+/* ---------- เลือกเดือน ---------- */
+.month-nav{ display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px; }
+.month-btn{ width:40px;height:40px;flex:0 0 auto;border:1px solid var(--line);background:var(--surface-2);border-radius:50%;
+  font-size:1.4rem;line-height:1;color:var(--peri-700);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s; }
+.month-btn:hover{ background:var(--peri-soft); }
+.month-label{ position:relative;text-align:center;flex:1;cursor:pointer; }
+.month-text{ font-family:'Baloo Thai 2';font-weight:700;font-size:1.18rem;color:var(--ink); }
+.month-hint{ display:block;font-size:.72rem;color:var(--ink-3);margin-top:-2px; }
+.month-label input[type=month]{ position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0; }
+
+/* ---------- การ์ดสรุป 5 ใบ ---------- */
+.stat-grid{ display:grid;grid-template-columns:1fr 1fr;gap:11px; }
+.stat-grid .stat:first-child{ grid-column:1 / -1; }
+.stat{ border-radius:var(--radius-sm);padding:14px 15px;border:1px solid var(--line);display:flex;align-items:center;gap:12px; }
+.stat .s-ic{ width:42px;height:42px;flex:0 0 auto;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.35rem; }
+.stat .s-num{ font-family:'Baloo Thai 2';font-weight:800;font-size:1.4rem;line-height:1.05; }
+.stat .s-lbl{ font-size:.8rem;color:var(--ink-2);font-weight:500; }
+.stat.actual{ background:var(--mint-soft);border-color:transparent; } .stat.actual .s-ic{ background:var(--surface);color:var(--mint); } .stat.actual .s-num{ color:var(--mint); }
+.stat.ot .s-ic{ background:var(--peri-soft);color:var(--peri-700); } .stat.ot .s-num{ color:var(--peri-700); }
+.stat.night .s-ic{ background:var(--peri-soft);color:var(--peri-700); } .stat.night .s-num{ color:var(--ink); }
+.stat.days .s-ic{ background:var(--amber-soft);color:var(--amber); } .stat.days .s-num{ color:var(--ink); }
+.stat.warn .s-ic{ background:var(--coral-soft);color:var(--coral); } .stat.warn .s-num{ color:var(--coral); }
+
+/* ---------- ตารางเทียบสลิป ---------- */
+.payslip-head{ display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none; }
+.payslip-head h2{ font-size:1.05rem; }
+.chev{ transition:.25s;color:var(--ink-3);font-size:1.1rem; }
+.payslip.collapsed .chev{ transform:rotate(-90deg); }
+.payslip.collapsed .payslip-body{ display:none; }
+.payslip-body{ margin-top:14px; }
+.pay-row{ display:flex;align-items:center;justify-content:space-between;padding:9px 2px;border-bottom:1px solid var(--line);font-size:.9rem; }
+.pay-row:last-child{ border-bottom:none; }
+.pay-row .pl{ color:var(--ink-2); }
+.pay-row .pl .jp{ display:inline;font-size:.72rem;margin:0;margin-right:6px;color:var(--ink-3); }
+.pay-row .pv{ font-family:'Baloo Thai 2';font-weight:700;color:var(--ink); }
+.pay-row.hl{ background:var(--mint-soft);margin:4px -10px;padding:11px 12px;border-radius:10px;border-bottom:none; }
+.pay-row.hl .pv{ color:var(--mint); }
+.pay-sub{ font-size:.75rem;color:var(--ink-3);margin-top:10px;line-height:1.5; }
+
+/* ---------- ฟอร์ม ---------- */
+.form-head{ display:flex;align-items:center;justify-content:space-between;margin-bottom:14px; }
+.form-title{ font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:8px; }
+.editing-badge{ display:none;font-size:.74rem;font-weight:600;color:#fff;background:var(--peach);padding:3px 10px;border-radius:999px; }
+.card.is-editing{ outline:2px solid var(--peach);outline-offset:2px; }
+.card.is-editing .editing-badge{ display:inline-block; }
+.field{ margin-bottom:13px; }
+.field label{ display:block;font-size:.84rem;font-weight:600;color:var(--ink-2);margin-bottom:6px; }
+.field label .req{ color:var(--peach);font-weight:700; }
+.field .tip{ font-weight:400;color:var(--ink-3);font-size:.78rem; }
+.row2{ display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+input[type=date],input[type=time],input[type=text],input[type=number],textarea,select{
+  width:100%;font-family:inherit;font-size:1rem;color:var(--ink);background:var(--surface-2);
+  border:1.5px solid var(--line);border-radius:var(--radius-xs);padding:11px 13px;transition:.15s; }
+input[type=time]{ font-family:'Baloo Thai 2';font-weight:600;letter-spacing:.5px; }
+textarea{ resize:vertical;min-height:46px;font-size:.95rem; }
+input:focus,textarea:focus,select:focus{ outline:none;border-color:var(--peri);background:var(--surface);box-shadow:0 0 0 4px var(--peri-soft); }
+select{ cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23938EAC' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 13px center; padding-right:34px; }
+
+/* ปุ่มเลือกประเภทวัน */
+.daytype-grid{ display:grid;grid-template-columns:1fr 1fr;gap:8px; }
+.daytype{ border:1.5px solid var(--line);background:var(--surface-2);border-radius:var(--radius-xs);padding:10px 8px;cursor:pointer;
+  font-size:.86rem;font-weight:600;color:var(--ink-2);text-align:center;transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px; }
+.daytype .dt-jp{ font-size:.66rem;font-weight:500;opacity:.75; }
+.daytype:hover{ background:var(--surface); }
+.daytype.sel{ color:#fff;border-color:transparent; }
+.daytype[data-t="normal"].sel{ background:var(--peri); }
+.daytype[data-t="holiday"].sel{ background:var(--coral); }
+.daytype[data-t="holiday_worked"].sel{ background:var(--amber); }
+.daytype[data-t="paid_leave"].sel{ background:var(--mint); }
+
+/* พักหลายรอบ */
+.break-row{ display:grid;grid-template-columns:1fr 1fr 40px;gap:8px;align-items:center;margin-bottom:8px; }
+.break-row .rm{ width:40px;height:42px;border:1.5px solid var(--line);background:var(--surface-2);border-radius:var(--radius-xs);
+  color:var(--coral);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center; }
+.break-row .rm:hover{ background:var(--coral-soft);border-color:var(--coral); }
+.add-break{ width:100%;border:1.5px dashed var(--line);background:transparent;border-radius:var(--radius-xs);
+  padding:9px;color:var(--peri-700);font-family:'Noto Sans Thai';font-size:.88rem;font-weight:600;cursor:pointer;transition:.15s; }
+.add-break:hover{ background:var(--peri-soft);border-color:var(--peri-soft); }
+.break-time-label{ font-size:.78rem;color:var(--ink-3);display:grid;grid-template-columns:1fr 1fr 40px;gap:8px;margin-bottom:4px; }
+.break-time-label span{ padding-left:2px; }
+
+/* กล่องผลคำนวณ */
+.preview{ margin-top:8px;border-radius:var(--radius-sm);padding:14px 15px;background:var(--surface-2);border:1px solid var(--line); }
+.preview-hint{ font-size:.86rem;color:var(--ink-3);text-align:center;padding:5px 0; }
+.preview-body{ display:none; }
+.preview.ready .preview-body{ display:block; } .preview.ready .preview-hint{ display:none; }
+.pv-grid{ display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:9px; }
+.pv-grid .pc{ background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-xs);padding:9px 4px; }
+.pc-lbl{ font-size:.71rem;color:var(--ink-3); } .pc-num{ font-family:'Baloo Thai 2';font-weight:700;font-size:1.02rem;margin-top:1px;color:var(--ink); }
+.pv-extra{ display:flex;flex-wrap:wrap;gap:6px;justify-content:center;font-size:.78rem; }
+.pv-chip{ background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--ink-2); }
+.pv-chip b{ color:var(--ink);font-family:'Baloo Thai 2'; }
+.pv-chip.cross{ background:var(--peri-soft);color:var(--peri-700);border-color:transparent; }
+.pv-chip.diff{ background:var(--coral-soft);color:var(--coral);border-color:transparent; }
+
+/* ปุ่ม */
+.btn{ width:100%;font-family:'Baloo Thai 2';font-weight:700;font-size:1.05rem;border:none;border-radius:var(--radius-xs);
+  padding:13px;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:8px; }
+.btn-primary{ background:var(--peri);color:#fff;box-shadow:0 4px 14px rgba(110,115,230,.35); }
+.btn-primary:hover{ background:var(--peri-700); } .btn-primary:active{ transform:translateY(1px); }
+.btn-ghost{ background:transparent;color:var(--ink-2);box-shadow:none;font-size:.95rem;padding:10px; }
+.btn-ghost:hover{ background:var(--surface-2); }
+.btn-row{ display:flex;gap:10px;margin-top:14px; } .btn-row .btn{flex:1}
+.bi-btn{ display:inline-flex;flex-direction:column;align-items:center;line-height:1.12; }
+.bi-btn .jp{ font-size:.6rem;margin:0; }
+.btn-primary .jp,.btn-danger .jp{ color:rgba(255,255,255,.82); }
+.form-msg{ display:none;margin-top:12px;font-size:.88rem;font-weight:500;background:var(--danger-soft);color:var(--danger);
+  padding:10px 13px;border-radius:var(--radius-xs); }
+.form-msg.show{ display:flex;align-items:center;gap:8px; }
+
+/* ประวัติ */
+.section-head{ display:flex;align-items:center;justify-content:space-between;margin:24px 4px 12px; }
+.section-head h2{ font-size:1.15rem; }
+.count-pill{ font-size:.78rem;color:var(--ink-3);background:var(--surface);border:1px solid var(--line);padding:3px 11px;border-radius:999px; }
+.rec{ background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);box-shadow:var(--shadow-sm);
+  padding:14px 15px;margin-bottom:11px;animation:pop .28s ease;border-left:4px solid var(--line); }
+.rec[data-t="normal"]{ border-left-color:var(--peri); }
+.rec[data-t="holiday"]{ border-left-color:var(--coral); }
+.rec[data-t="holiday_worked"]{ border-left-color:var(--amber); }
+.rec[data-t="paid_leave"]{ border-left-color:var(--mint); }
+@keyframes pop{ from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+.rec-top{ display:flex;align-items:flex-start;justify-content:space-between;gap:10px; }
+.rec-date{ font-family:'Baloo Thai 2';font-weight:700;font-size:1.02rem;color:var(--ink); }
+.rec-badges{ display:flex;flex-wrap:wrap;gap:5px;margin-top:4px; }
+.tag{ font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:999px; }
+.tag.t-normal{ background:var(--peri-soft);color:var(--peri-700); }
+.tag.t-holiday{ background:var(--coral-soft);color:var(--coral); }
+.tag.t-holiday_worked{ background:var(--amber-soft);color:var(--amber); }
+.tag.t-paid_leave{ background:var(--mint-soft);color:var(--mint); }
+.tag.cross{ background:var(--peri-soft);color:var(--peri-700); }
+.tag.review{ background:var(--coral-soft);color:var(--coral); }
+.rec-actual{ text-align:right;flex:0 0 auto; }
+.rec-actual .ra-num{ font-family:'Baloo Thai 2';font-weight:800;font-size:1.18rem;color:var(--mint);line-height:1; }
+.rec-actual.leave .ra-num{ color:var(--mint);font-size:1rem; }
+.rec-actual .ra-lbl{ font-size:.68rem;color:var(--ink-3); }
+.rec-times{ font-size:.84rem;color:var(--ink-2);margin-top:9px; }
+.rec-metrics{ display:flex;flex-wrap:wrap;gap:5px;margin-top:9px; }
+.metric{ font-size:.74rem;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:3px 8px;color:var(--ink-2); }
+.metric b{ color:var(--ink);font-family:'Baloo Thai 2'; }
+.metric.ot b{ color:var(--peri-700); } .metric.night b{ color:var(--ink); }
+.rec-note{ font-size:.83rem;color:var(--ink-2);background:var(--surface-2);border-radius:var(--radius-xs);padding:8px 11px;margin-top:9px;border:1px dashed var(--line); }
+.rec-note::before{ content:"📝 ";opacity:.7; }
+.rec-actions{ display:flex;gap:8px;margin-top:11px;padding-top:11px;border-top:1px solid var(--line); }
+.act-btn{ flex:1;border:1px solid var(--line);background:var(--surface-2);border-radius:var(--radius-xs);padding:8px;
+  font-family:'Noto Sans Thai';font-size:.86rem;font-weight:600;color:var(--ink-2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:.15s; }
+.act-btn.edit:hover{ color:var(--peri-700);border-color:var(--peri-soft); }
+.act-btn.del:hover{ color:var(--danger);border-color:var(--danger);background:var(--danger-soft); }
+.empty{ text-align:center;padding:38px 20px;color:var(--ink-3); }
+.empty .e-ic{ font-size:2.6rem;display:block;margin-bottom:10px; }
+.empty .e-title{ font-family:'Baloo Thai 2';font-weight:700;font-size:1.05rem;color:var(--ink-2);margin-bottom:4px; }
+
+/* ปุ่มข้อมูล */
+.data-card h2{ font-size:1.1rem;margin-bottom:13px; }
+.data-btns{ display:grid;grid-template-columns:1fr 1fr;gap:9px; }
+.btn-tile{ display:flex;flex-direction:column;align-items:center;gap:5px;background:var(--surface-2);border:1.5px solid var(--line);
+  border-radius:var(--radius-xs);padding:13px 6px;cursor:pointer;transition:.15s;font-family:'Noto Sans Thai';color:var(--ink-2);font-size:.8rem;font-weight:600;text-align:center;line-height:1.2; }
+.btn-tile.feat{ border-color:#B9E8DD;background:var(--mint-soft);color:var(--mint); }
+.btn-tile.feat:hover{ filter:brightness(1.03); }
+.btn-tile .t-ic{ font-size:1.4rem;line-height:1; }
+.btn-tile:hover{ background:var(--surface);transform:translateY(-1px);box-shadow:var(--shadow-sm); }
+.data-hint{ font-size:.76rem;color:var(--ink-3);margin-top:13px;line-height:1.6;display:flex;gap:7px; }
+
+/* Modal */
+.overlay{ position:fixed;inset:0;background:rgba(20,18,30,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;
+  padding:20px;z-index:100;animation:fade .2s ease;overflow-y:auto; }
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.modal{ background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;max-width:380px;width:100%;animation:pop .25s ease;margin:auto; }
+.modal.center{ text-align:center; }
+.modal h3{ font-size:1.18rem;margin-bottom:6px; }
+.modal .m-ic{ font-size:2.1rem;margin-bottom:8px; }
+.modal p{ font-size:.92rem;color:var(--ink-2);margin-bottom:18px; }
+.modal-btns{ display:flex;gap:10px; }
+.btn-cancel{ background:var(--surface-2);color:var(--ink-2); } .btn-cancel:hover{ background:var(--line); }
+.btn-danger{ background:var(--danger);color:#fff; }
+
+/* Settings */
+.set-head{ display:flex;align-items:center;justify-content:space-between;margin-bottom:6px; }
+.set-head h3{ display:flex;align-items:center;gap:8px; }
+.set-close{ width:34px;height:34px;border:none;background:var(--surface-2);border-radius:10px;font-size:1.1rem;cursor:pointer;color:var(--ink-2); }
+.set-sub{ font-size:.82rem;color:var(--ink-3);margin-bottom:16px; }
+.set-group{ margin-bottom:16px; }
+.set-group > label{ display:block;font-size:.85rem;font-weight:600;color:var(--ink);margin-bottom:7px; }
+.set-group > label .jp{ display:inline;font-size:.68rem;margin:0;margin-right:5px; }
+.radio-row{ display:flex;flex-direction:column;gap:7px; }
+.radio-opt{ display:flex;align-items:center;gap:9px;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius-xs);cursor:pointer;font-size:.88rem;transition:.15s;color:var(--ink-2); }
+.radio-opt.sel{ border-color:var(--peri);background:var(--peri-soft);color:var(--ink); }
+.radio-opt .dot{ width:18px;height:18px;border-radius:50%;border:2px solid var(--ink-3);flex:0 0 auto;position:relative; }
+.radio-opt.sel .dot{ border-color:var(--peri); }
+.radio-opt.sel .dot::after{ content:"";position:absolute;inset:3px;border-radius:50%;background:var(--peri); }
+.toggle{ display:flex;align-items:center;justify-content:space-between;padding:11px 0; }
+.toggle-label{ font-size:.9rem;font-weight:600;color:var(--ink); }
+.switch{ width:50px;height:28px;border-radius:999px;background:var(--line);position:relative;cursor:pointer;transition:.2s;flex:0 0 auto; }
+.switch.on{ background:var(--peri); }
+.switch::after{ content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s; }
+.switch.on::after{ left:25px; }
+#toast{ position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);
+  font-size:.9rem;font-weight:500;padding:11px 20px;border-radius:999px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.3s;z-index:200;display:flex;align-items:center;gap:8px;max-width:88vw; }
+#toast.show{ opacity:1;transform:translateX(-50%) translateY(0); }
+#toast.ok{ background:var(--mint);color:#fff; } #toast.warn{ background:var(--peach);color:#5a2e1a; }
+footer{ text-align:center;font-size:.74rem;color:var(--ink-3);margin-top:24px;line-height:1.7;padding:0 10px; }
+@media (prefers-reduced-motion: reduce){ *{animation:none !important;transition:none !important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="topbar">
+    <div class="brand-mini">
+      <span class="brand-eyebrow">🌙 勤務ノート</span>
+      <h1>บันทึกเวลาทำงาน</h1>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" id="themeBtn" aria-label="สลับโหมดมืด">🌙</button>
+      <button class="icon-btn" id="settingsBtn" aria-label="ตั้งค่า">⚙️</button>
+    </div>
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="disclaimer">
+    <span>ℹ️</span>
+    <span>ตัวเลขนี้ใช้สำหรับ<b>บันทึกส่วนตัวและเทียบกับสลิป</b>เท่านั้น อาจต่างจากระบบบริษัทตามกฎการปัดเวลาและการคำนวณเงินเดือนจริง</span>
+  </div>
+
+  <!-- สรุปรายเดือน -->
+  <section class="card">
+    <div class="month-nav">
+      <button class="month-btn" id="prevM" aria-label="เดือนก่อน">‹</button>
+      <label class="month-label">
+        <span class="month-text" id="monthText">—</span>
+        <span class="month-hint">แตะเพื่อเลือกเดือน</span>
+        <input type="month" id="monthInput" aria-label="เลือกเดือน">
+      </label>
+      <button class="month-btn" id="nextM" aria-label="เดือนถัดไป">›</button>
+    </div>
+    <div class="stat-grid">
+      <div class="stat actual"><div class="s-ic">⏱️</div><div><div class="s-num" id="stActual">0 ชม.</div><div class="s-lbl">ชั่วโมงทำงานจริงเดือนนี้ · 出勤時間</div></div></div>
+      <div class="stat ot"><div class="s-ic">➕</div><div><div class="s-num" id="stOT">0 ชม.</div><div class="s-lbl">โอที · 残業</div></div></div>
+      <div class="stat night"><div class="s-ic">🌙</div><div><div class="s-num" id="stNight">0 ชม.</div><div class="s-lbl">กะดึก · 深夜</div></div></div>
+      <div class="stat days"><div class="s-ic">📅</div><div><div class="s-num" id="stDays">0 วัน</div><div class="s-lbl">วันทำงาน · 出勤日数</div></div></div>
+      <div class="stat warn"><div class="s-ic">⚠️</div><div><div class="s-num" id="stWarn">0 วัน</div><div class="s-lbl">ต้องตรวจสอบ</div></div></div>
+    </div>
+  </section>
+
+  <!-- เทียบสลิป -->
+  <section class="card payslip collapsed" id="payslip">
+    <div class="payslip-head" id="payslipHead">
+      <h2>📋 สรุปเทียบสลิป · 給与明細</h2>
+      <span class="chev">▾</span>
+    </div>
+    <div class="payslip-body" id="payslipBody"></div>
+  </section>
+
+  <!-- ฟอร์ม -->
+  <section class="card" id="formCard">
+    <div class="form-head">
+      <div class="form-title"><span id="formIcon">➕</span> <span id="formTitle">เพิ่มบันทึกใหม่</span></div>
+      <span class="editing-badge">กำลังแก้ไข</span>
+    </div>
+
+    <div class="field">
+      <label for="inDate">วันที่ทำงาน <span class="req">*</span> <span class="tip">(วันที่เริ่มกะ)</span></label>
+      <input type="date" id="inDate">
+    </div>
+
+    <div class="field">
+      <label>ประเภทวัน <span class="req">*</span></label>
+      <div class="daytype-grid" id="dayTypeGrid">
+        <button type="button" class="daytype sel" data-t="normal">วันทำงานปกติ <span class="dt-jp">平日</span></button>
+        <button type="button" class="daytype" data-t="holiday">วันอาทิตย์/หยุด <span class="dt-jp">日祝</span></button>
+        <button type="button" class="daytype" data-t="holiday_worked">หยุดแต่ถูกเรียก <span class="dt-jp">休日出勤</span></button>
+        <button type="button" class="daytype" data-t="paid_leave">ลาพักร้อน <span class="dt-jp">有休</span></button>
+      </div>
+    </div>
+
+    <!-- ส่วนเวลา (ซ่อนเมื่อเป็นวันลา) -->
+    <div id="timeSection">
+      <div class="row2">
+        <div class="field"><label for="inClockIn">เวลาเข้างานจริง <span class="req">*</span></label><input type="time" id="inClockIn"></div>
+        <div class="field"><label for="inClockOut">เวลาเลิกงานจริง <span class="req">*</span></label><input type="time" id="inClockOut"></div>
+      </div>
+
+      <div class="field">
+        <label>เวลาพักเบรค <span class="tip">(เพิ่มได้หลายรอบ)</span></label>
+        <div class="break-time-label" id="breakLabels" style="display:none"><span>เริ่มพัก 休憩開始</span><span>กลับ 休憩終了</span><span></span></div>
+        <div id="breaksList"></div>
+        <button type="button" class="add-break" id="addBreakBtn">+ เพิ่มรอบพัก</button>
+      </div>
+
+      <div class="field">
+        <label for="cmpToggle" style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:0">
+          <span class="switch" id="cmpSwitch"></span>
+          <span style="font-weight:600;color:var(--ink-2)">เทียบกับเวลาที่บริษัทบันทึก <span class="tip">(ถ้ามี)</span></span>
+        </label>
+        <div id="cmpFields" style="display:none;margin-top:11px">
+          <div class="row2">
+            <div class="field" style="margin:0"><label for="inCompanyIn">บริษัทลงเข้างาน</label><input type="time" id="inCompanyIn"></div>
+            <div class="field" style="margin:0"><label for="inCompanyOut">บริษัทลงเลิกงาน</label><input type="time" id="inCompanyOut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="inNote">หมายเหตุ <span class="tip">(เช่น เครื่องสแกนขึ้นเวลาเอง, ลืมตอกนิ้ว, มีรูปหลักฐาน)</span></label>
+      <textarea id="inNote" placeholder="บันทึกเพิ่มเติม..."></textarea>
+    </div>
+
+    <!-- พรีวิว -->
+    <div class="preview" id="preview">
+      <div class="preview-hint" id="previewHint">กรอกเวลาเข้า–เลิกงานเพื่อดูผลคำนวณ</div>
+      <div class="preview-body">
+        <div class="pv-grid">
+          <div class="pc"><div class="pc-lbl">เวลารวม</div><div class="pc-num" id="pvGross">—</div></div>
+          <div class="pc"><div class="pc-lbl">พักรวม</div><div class="pc-num" id="pvBreak">—</div></div>
+          <div class="pc"><div class="pc-lbl">ทำงานจริง</div><div class="pc-num" id="pvActual">—</div></div>
+        </div>
+        <div class="pv-extra" id="pvExtra"></div>
+      </div>
+    </div>
+
+    <div class="form-msg" id="formMsg"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="saveBtn">💾 บันทึก</button>
+      <button class="btn btn-ghost" id="cancelBtn" style="display:none">ยกเลิก</button>
+    </div>
+  </section>
+
+  <!-- ประวัติ -->
+  <div class="section-head">
+    <h2>ประวัติการทำงาน</h2>
+    <span class="count-pill" id="countPill">0 รายการ</span>
+  </div>
+  <div id="historyList"></div>
+
+  <!-- ข้อมูล -->
+  <section class="card data-card">
+    <h2>ข้อมูล · データ</h2>
+    <div class="data-btns">
+      <button class="btn-tile feat" id="pdfBtn"><span class="t-ic">📄</span>ดาวน์โหลด PDF</button>
+      <button class="btn-tile" id="exportBtn"><span class="t-ic">📊</span>Export CSV</button>
+      <button class="btn-tile" id="backupBtn"><span class="t-ic">💾</span>สำรอง JSON</button>
+      <button class="btn-tile" id="importBtn"><span class="t-ic">📥</span>กู้ข้อมูล</button>
+    </div>
+    <input type="file" id="importFile" accept="application/json,.json" hidden>
+    <p class="data-hint">🛡️ <span>ข้อมูลเก็บในเครื่องนี้เท่านั้น แนะนำสำรอง JSON ไว้เป็นระยะ</span></p>
+  </section>
+
+  <footer>
+    เก็บข้อมูลในเครื่อง (LocalStorage) ไม่ส่งออกที่ไหน<br>
+    勤務ノート · สมุดบันทึกเวลาส่วนตัว สำหรับเทียบกับสลิป 🌙→☀️
+  </footer>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============================================================================
+   1) ที่เก็บข้อมูล (LocalStorage แบบกันพัง — มี fallback ในหน่วยความจำ)
+   ============================================================================ */
+function makeStore(key){
+  let mem=null;
+  return {
+    read(def){ try{ const r=localStorage.getItem(key); return r?JSON.parse(r):(mem??def); }catch(e){ return mem??def; } },
+    write(d){ mem=d; try{ localStorage.setItem(key, JSON.stringify(d)); }catch(e){} }
+  };
+}
+const recStore = makeStore('wtt2_records');
+const setStore = makeStore('wtt2_settings');
+
+/* ============================================================================
+   2) สถานะ + ค่าตั้งต้น
+   ============================================================================ */
+const DEFAULT_SETTINGS = { stdPerDayMin:480, otMethod:'daily', monthlyStdMin:168*60, rounding:0, nightStart:22*60, nightEnd:5*60, dark:false };
+let settings = Object.assign({}, DEFAULT_SETTINGS, recStore ? setStore.read({}) : {});
+let records = recStore.read([]);
+let selectedMonth = todayStr().slice(0,7);
+let editingId = null;
+let formDayType = 'normal';
+let formBreaks = [];   // [{start,end}]
+let cmpOn = false;
+
+const $ = id => document.getElementById(id);
+
+/* ============================================================================
+   3) ★ เครื่องคำนวณเวลา (ทดสอบผ่านครบทุกเคสแล้ว) ★
+   หลักการกะข้ามวัน: ยึด "เวลาเข้างาน" เป็นจุด 0 เวลาใดน้อยกว่าเข้างาน = วันถัดไป (+1440 นาที)
+   ============================================================================ */
+function toMin(hhmm){ if(hhmm===''||hhmm==null) return null; const [h,m]=hhmm.split(':').map(Number); return h*60+m; }
+function fromMin(min){ const h=Math.floor(min/60), m=min%60; return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`; }
+function offset(t, start){ let d=t-start; if(d<0) d+=1440; return d; }   // ระยะนาทีนับจากเวลาเข้างาน
+function roundDown(min, inc){ return inc>0 ? Math.floor(min/inc)*inc : min; }
+// อยู่ในช่วงกะดึกไหม (รองรับช่วงที่คร่อมเที่ยงคืน เช่น 22:00–05:00)
+function isNight(wall, ns, ne){ return ns<=ne ? (wall>=ns && wall<ne) : (wall>=ns || wall<ne); }
+// นับนาทีกะดึกในช่วง [startOff,endOff) โดยเทียบเวลานาฬิกาจริง
+function nightMinutes(startOff, endOff, inMin, ns, ne){
+  let c=0; for(let a=startOff; a<endOff; a++){ if(isNight((inMin+a)%1440, ns, ne)) c++; } return c;
+}
+// ตัดช่วงพักออกจากช่วงทำงานทั้งหมด -> คืนช่วงที่ "ทำงานจริง"
+function workIntervals(gross, breaks){
+  let iv=[[0,gross]];
+  for(const [bs,be] of breaks){
+    const next=[];
+    for(const [s,e] of iv){
+      if(be<=s || bs>=e){ next.push([s,e]); continue; }
+      if(bs>s) next.push([s, bs]);
+      if(be<e) next.push([be, e]);
+    }
+    iv=next.filter(([s,e])=>e>s);
+  }
+  return iv;
+}
+// คำนวณค่าทั้งหมดของ 1 วัน
+function computeDay(rec, st){
+  const issues=[];
+  const worked = rec.dayType!=='paid_leave';
+  const inMin=toMin(rec.clockIn), outMin=toMin(rec.clockOut);
+  const empty={ grossMin:0,breakMin:0,actualRawMin:0,actualMin:0,normalMin:0,otMin:0,nightMin:0,holidayMin:0,companyGrossMin:null,diffMin:null,crossDay:false,worked,issues };
+  if(!worked) return empty;
+  if(inMin==null || outMin==null){ issues.push('missing'); return Object.assign(empty,{issues}); }
+
+  const grossMin = offset(outMin, inMin);
+  if(grossMin===0) issues.push('zero');
+  if(grossMin>1200) issues.push('too_long');
+
+  let breakMin=0; const bIv=[];
+  for(const b of (rec.breaks||[])){
+    if(!b.start || !b.end) continue;
+    const bs=offset(toMin(b.start), inMin), be=offset(toMin(b.end), inMin);
+    if(be<=bs){ issues.push('break_order'); continue; }        // กลับก่อนเริ่มพัก (anchoring จัดการข้ามวันแล้ว)
+    if(bs>grossMin || be>grossMin) issues.push('break_outside');
+    breakMin += be-bs; bIv.push([bs,be]);
+  }
+  if(grossMin>0 && breakMin>=grossMin) issues.push('break_over');  // พักมากกว่าเวลาทำงาน
+
+  const actualRawMin = Math.max(0, grossMin-breakMin);
+  const actualMin = roundDown(actualRawMin, st.rounding);
+
+  // กะดึก: เฉพาะช่วงทำงานจริง (หักพักออกแล้วในตัว)
+  const wIv = workIntervals(grossMin, bIv.sort((a,b)=>a[0]-b[0]));
+  let nightMin=0; for(const [s,e] of wIv) nightMin += nightMinutes(s,e,inMin,st.nightStart,st.nightEnd);
+  nightMin = Math.min(nightMin, actualRawMin);
+
+  const isHoliday = (rec.dayType==='holiday'||rec.dayType==='holiday_worked');
+  let normalMin=0,otMin=0,holidayMin=0;
+  if(isHoliday){ holidayMin=actualMin; }                                  // วันหยุด: ทั้งหมดเป็นชั่วโมงวันหยุด
+  else if(st.otMethod==='daily'){ otMin=Math.max(0,actualMin-st.stdPerDayMin); normalMin=actualMin-otMin; }
+  else { normalMin=actualMin; }                                          // โหมดรายเดือน: คิด OT ตอนรวมเดือน
+
+  // เทียบเวลาบริษัท
+  let companyGrossMin=null, diffMin=null;
+  const cin=toMin(rec.companyIn), cout=toMin(rec.companyOut);
+  if(cin!=null && cout!=null){ companyGrossMin=offset(cout,cin); diffMin=grossMin-companyGrossMin; if(Math.abs(diffMin)>=1) issues.push('company_mismatch'); }
+
+  return { grossMin,breakMin,actualRawMin,actualMin,normalMin,otMin,nightMin,holidayMin,companyGrossMin,diffMin,crossDay:outMin<=inMin,worked,issues };
+}
+// รวมทั้งเดือน
+function aggregateMonth(recs, st){
+  let actual=0,breakT=0,night=0,holiday=0,normalSum=0,otSum=0,weekdayActual=0;
+  let workDays=0,yukyu=0,weekdayDays=0,holidayDays=0,abnormalDays=0,diffTotal=0;
+  for(const r of recs){
+    const c=computeDay(r,st);
+    if(r.dayType==='paid_leave'){ yukyu++; if(c.issues.length)abnormalDays++; continue; }
+    const hasTimes = toMin(r.clockIn)!=null && toMin(r.clockOut)!=null;
+    if(hasTimes){
+      workDays++; actual+=c.actualMin; breakT+=c.breakMin; night+=c.nightMin; holiday+=c.holidayMin;
+      if(r.dayType==='holiday'||r.dayType==='holiday_worked') holidayDays++;
+      else { weekdayDays++; weekdayActual+=c.actualMin; }
+      normalSum+=c.normalMin; otSum+=c.otMin;
+      if(c.diffMin!=null) diffTotal+=c.diffMin;
+    }
+    if(c.issues.length) abnormalDays++;
+  }
+  let normalTotal,otTotal;
+  if(st.otMethod==='monthly'){ otTotal=Math.max(0,weekdayActual-st.monthlyStdMin); normalTotal=weekdayActual-otTotal; }
+  else { otTotal=otSum; normalTotal=normalSum; }
+  return { actual,breakT,night,holiday,normalTotal,otTotal,workDays,yukyu,weekdayDays,holidayDays,abnormalDays,diffTotal };
+}
+
+/* ============================================================================
+   4) จัดรูปแบบ + วัน/เดือนภาษาไทย
+   ============================================================================ */
+function fmtShort(min){ const h=Math.floor(min/60),m=min%60; return m===0?`${h} ชม.`:`${h} ชม. ${m} น.`; }
+function fmtHM(min){ return `${Math.floor(min/60)}:${String(min%60).padStart(2,'0')}`; }
+function decHours(min){ return (min/60).toFixed(2); }
+const D_SHORT=['อา.','จ.','อ.','พ.','พฤ.','ศ.','ส.'];
+const M_FULL=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const M_SHORT=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const DT_LABEL={ normal:'วันทำงานปกติ', holiday:'วันอาทิตย์/หยุด', holiday_worked:'หยุดถูกเรียก', paid_leave:'ลาพักร้อน' };
+const DT_JP={ normal:'平日', holiday:'日祝', holiday_worked:'休日出勤', paid_leave:'有休' };
+function parseDate(s){ const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
+function thaiDateShort(s){ const dt=parseDate(s); return `${D_SHORT[dt.getDay()]} ${dt.getDate()} ${M_SHORT[dt.getMonth()]} ${dt.getFullYear()}`; }
+function thaiMonthLabel(ym){ const [y,m]=ym.split('-').map(Number); return `${M_FULL[m-1]} ${y}`; }
+function todayStr(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function parseHM(str){ if(!str) return 0; const p=String(str).split(':'); const h=parseInt(p[0]||'0',10)||0; const m=parseInt(p[1]||'0',10)||0; return h*60+m; }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+/* ============================================================================
+   5) ตรวจสอบก่อนบันทึก (คืนข้อความ error หรือ null)
+   ============================================================================ */
+function validate(rec){
+  if(!rec.date) return 'กรุณาเลือกวันที่ทำงาน';
+  if(rec.dayType==='paid_leave') return null;   // วันลา ไม่ต้องมีเวลา
+  if(!rec.clockIn) return 'กรุณากรอกเวลาเข้างาน';
+  if(!rec.clockOut) return 'กรุณากรอกเวลาเลิกงาน';
+  const c = computeDay(rec, settings);
+  if(c.issues.includes('zero')) return 'เวลาเลิกงานต้องไม่เท่ากับเวลาเข้างาน';
+  if(c.issues.includes('break_order')) return 'เวลากลับจากพักต้องอยู่หลังเวลาเริ่มพัก';
+  if(c.issues.includes('break_over')) return 'เวลาพักมากกว่าหรือเท่ากับเวลาทำงานทั้งหมด ตรวจสอบอีกครั้ง';
+  return null;
+}
+
+/* ============================================================================
+   6) ฟอร์ม: ประเภทวัน, พักหลายรอบ, เทียบเวลาบริษัท, พรีวิว
+   ============================================================================ */
+function renderBreaks(){
+  const list=$('breaksList');
+  $('breakLabels').style.display = formBreaks.length ? 'grid' : 'none';
+  list.innerHTML = formBreaks.map((b,i)=>`
+    <div class="break-row">
+      <input type="time" data-bi="${i}" data-bk="start" value="${b.start||''}">
+      <input type="time" data-bi="${i}" data-bk="end" value="${b.end||''}">
+      <button type="button" class="rm" data-rmbreak="${i}" aria-label="ลบรอบพัก">✕</button>
+    </div>`).join('');
+  list.querySelectorAll('input[type=time]').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const i=+e.target.dataset.bi, k=e.target.dataset.bk;
+      formBreaks[i][k]=e.target.value; updatePreview();
+    });
+  });
+  list.querySelectorAll('[data-rmbreak]').forEach(btn=>{
+    btn.onclick=()=>{ formBreaks.splice(+btn.dataset.rmbreak,1); renderBreaks(); updatePreview(); };
+  });
+}
+function setDayType(t){
+  formDayType=t;
+  document.querySelectorAll('.daytype').forEach(b=> b.classList.toggle('sel', b.dataset.t===t));
+  $('timeSection').style.display = (t==='paid_leave') ? 'none' : 'block';
+  updatePreview();
+}
+function readForm(){
+  return {
+    date:$('inDate').value, dayType:formDayType,
+    clockIn:$('inClockIn').value, clockOut:$('inClockOut').value,
+    breaks: formBreaks.filter(b=>b.start&&b.end).map(b=>({start:b.start,end:b.end})),
+    companyIn: cmpOn ? $('inCompanyIn').value : '',
+    companyOut: cmpOn ? $('inCompanyOut').value : '',
+    note:$('inNote').value.trim()
+  };
+}
+function updatePreview(){
+  const pv=$('preview'), rec=readForm();
+  if(rec.dayType==='paid_leave'){ pv.classList.remove('ready'); $('previewHint').textContent='วันลาพักร้อน (有休) — นับเป็น 1 วันลา ไม่คิดชั่วโมงทำงาน'; $('previewHint').style.color='var(--mint)'; return; }
+  $('previewHint').style.color='';
+  if(!rec.clockIn || !rec.clockOut){ pv.classList.remove('ready'); $('previewHint').textContent='กรอกเวลาเข้า–เลิกงานเพื่อดูผลคำนวณ'; return; }
+  const c=computeDay(rec, settings);
+  pv.classList.add('ready');
+  $('pvGross').textContent=fmtShort(c.grossMin);
+  $('pvBreak').textContent=c.breakMin?fmtShort(c.breakMin):'0 ชม.';
+  $('pvActual').textContent=fmtShort(c.actualMin);
+  let chips=[];
+  if(c.crossDay) chips.push('<span class="pv-chip cross">↪ ข้ามวัน</span>');
+  if(c.nightMin>0) chips.push(`<span class="pv-chip">🌙 กะดึก <b>${fmtShort(c.nightMin)}</b></span>`);
+  if(c.otMin>0) chips.push(`<span class="pv-chip">➕ OT <b>${fmtShort(c.otMin)}</b></span>`);
+  if(c.holidayMin>0) chips.push(`<span class="pv-chip">🎌 วันหยุด <b>${fmtShort(c.holidayMin)}</b></span>`);
+  if(c.diffMin!=null && c.diffMin!==0) chips.push(`<span class="pv-chip diff">⚠️ ต่างจากบริษัท ${c.diffMin>0?'+':''}${fmtHM(Math.abs(c.diffMin)).replace('0:','0ชม.')} ${c.diffMin>0?'(ทำมากกว่า)':'(ทำน้อยกว่า)'}</span>`);
+  $('pvExtra').innerHTML=chips.join('');
+}
+
+/* ============================================================================
+   7) เรนเดอร์สรุป + เทียบสลิป
+   ============================================================================ */
+function recsOfMonth(ym){ return records.filter(r=>r.date.slice(0,7)===ym); }
+function renderSummary(){
+  $('monthInput').value=selectedMonth;
+  $('monthText').textContent=thaiMonthLabel(selectedMonth);
+  const a=aggregateMonth(recsOfMonth(selectedMonth), settings);
+  $('stActual').textContent=fmtShort(a.actual);
+  $('stOT').textContent=fmtShort(a.otTotal);
+  $('stNight').textContent=fmtShort(a.night);
+  $('stDays').textContent=`${a.workDays} วัน`;
+  $('stWarn').textContent=`${a.abnormalDays} วัน`;
+
+  const rows=[
+    ['出勤日数','วันทำงานรวม',`${a.workDays} วัน`,false],
+    ['有休','วันลาพักร้อน',`${a.yukyu} วัน`,false],
+    ['平日日数','วันทำงานปกติ',`${a.weekdayDays} วัน`,false],
+    ['日祝日数','วันอาทิตย์/หยุด',`${a.holidayDays} วัน`,false],
+    ['出勤時間','ชั่วโมงทำงานจริงรวม',fmtShort(a.actual),true],
+    ['所定内時間','ชั่วโมงปกติ',fmtShort(a.normalTotal),false],
+    ['残業時間','ชั่วโมงโอที',fmtShort(a.otTotal),false],
+    ['深夜時間','ชั่วโมงกะดึก',fmtShort(a.night),false],
+    ['日祝時間','ชั่วโมงวันหยุด',fmtShort(a.holiday),false],
+    ['休憩時間','เวลาพักรวม',fmtShort(a.breakT),false],
+  ];
+  let html=rows.map(([jp,th,val,hl])=>`<div class="pay-row${hl?' hl':''}"><span class="pl"><span class="jp">${jp}</span>${th}</span><span class="pv">${val}</span></div>`).join('');
+  if(a.diffTotal!==0){
+    const sign=a.diffTotal>0?'+':'';
+    html+=`<div class="pay-sub">⚠️ รวมส่วนต่างจากเวลาที่บริษัทบันทึกเดือนนี้: <b style="color:var(--coral)">${sign}${fmtShort(Math.abs(a.diffTotal))}</b> ${a.diffTotal>0?'(คุณจดว่าทำงานมากกว่าที่บริษัทลงไว้)':'(คุณจดว่าทำงานน้อยกว่าที่บริษัทลงไว้)'}</div>`;
+  }
+  html+=`<div class="pay-sub">💡 ตัวเลขคำนวณตามค่าที่ตั้งใน ⚙️ (ปัดเวลา: ${settings.rounding?('ปัดลง '+settings.rounding+' นาที'):'ไม่ปัด'} · OT: ${settings.otMethod==='daily'?'เกิน '+fmtHM(settings.stdPerDayMin)+' ต่อวัน':'เกิน '+fmtHM(settings.monthlyStdMin)+' ต่อเดือน'} · กะดึก: ${fmtHM(settings.nightStart)}–${fmtHM(settings.nightEnd)}) — อาจต่างจากสลิปจริง</div>`;
+  $('payslipBody').innerHTML=html;
+}
+
+/* ============================================================================
+   8) เรนเดอร์ประวัติ
+   ============================================================================ */
+function renderHistory(){
+  const recs=recsOfMonth(selectedMonth).slice().sort((a,b)=> a.date!==b.date ? (a.date<b.date?1:-1) : ((toMin(a.clockIn)??0)<(toMin(b.clockIn)??0)?1:-1));
+  $('countPill').textContent=`${recs.length} รายการ`;
+  const list=$('historyList');
+  if(!recs.length){ list.innerHTML=`<div class="card empty"><span class="e-ic">🌙</span><div class="e-title">ยังไม่มีบันทึกในเดือนนี้</div><div>กรอกข้อมูลด้านบนแล้วกด “บันทึก” ได้เลย</div></div>`; return; }
+
+  list.innerHTML=recs.map(r=>{
+    const c=computeDay(r, settings);
+    const review = c.issues.length>0;
+    const isLeave = r.dayType==='paid_leave';
+    let badges=`<span class="tag t-${r.dayType}">${DT_JP[r.dayType]} ${DT_LABEL[r.dayType]}</span>`;
+    if(c.crossDay) badges+=`<span class="tag cross">↪ ข้ามวัน</span>`;
+    if(review) badges+=`<span class="tag review">⚠️ ต้องตรวจสอบ</span>`;
+
+    let right = isLeave
+      ? `<div class="rec-actual leave"><div class="ra-num">有休</div><div class="ra-lbl">วันลา</div></div>`
+      : `<div class="rec-actual"><div class="ra-num">${fmtShort(c.actualMin)}</div><span class="jp" style="text-align:right">実働</span><div class="ra-lbl">ทำงานจริง</div></div>`;
+
+    let times = isLeave ? '' : `<div class="rec-times">🌙 ${r.clockIn||'—'} → ${r.clockOut||'—'} ☀️${r.breaks&&r.breaks.length?` · 休憩 พัก ${r.breaks.length} รอบ`:''}</div>`;
+
+    let metrics='';
+    if(!isLeave){
+      metrics='<div class="rec-metrics">';
+      metrics+=`<span class="metric"><span class="jp" style="display:inline;margin:0">総</span>รวม <b>${fmtShort(c.grossMin)}</b></span>`;
+      if(c.breakMin>0) metrics+=`<span class="metric"><span class="jp" style="display:inline;margin:0">休憩</span>พัก <b>${fmtShort(c.breakMin)}</b></span>`;
+      if(c.otMin>0) metrics+=`<span class="metric ot"><span class="jp" style="display:inline;margin:0">残業</span>OT <b>${fmtShort(c.otMin)}</b></span>`;
+      if(c.nightMin>0) metrics+=`<span class="metric night"><span class="jp" style="display:inline;margin:0">深夜</span>🌙 <b>${fmtShort(c.nightMin)}</b></span>`;
+      if(c.holidayMin>0) metrics+=`<span class="metric"><span class="jp" style="display:inline;margin:0">日祝</span>🎌 <b>${fmtShort(c.holidayMin)}</b></span>`;
+      if(c.diffMin!=null && c.diffMin!==0) metrics+=`<span class="metric" style="color:var(--coral)"><span class="jp" style="display:inline;margin:0;color:var(--coral)">会社差</span>บริษัท ${c.diffMin>0?'-':'+'}${fmtShort(Math.abs(c.diffMin))}</span>`;
+      metrics+='</div>';
+    }
+    const note = r.note ? `<div class="rec-note">${escapeHtml(r.note)}</div>` : '';
+    return `<div class="rec" data-t="${r.dayType}" data-id="${r.id}">
+      <div class="rec-top">
+        <div><div class="rec-date">${thaiDateShort(r.date)}</div><div class="rec-badges">${badges}</div></div>
+        ${right}
+      </div>
+      ${times}${metrics}${note}
+      <div class="rec-actions">
+        <button class="act-btn edit" data-edit="${r.id}">✏️ แก้ไข</button>
+        <button class="act-btn del" data-del="${r.id}">🗑️ ลบ</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ============================================================================
+   9) บันทึก / แก้ไข / ลบ
+   ============================================================================ */
+function saveRecord(){
+  const rec=readForm();
+  const err=validate(rec);
+  const msg=$('formMsg');
+  if(err){ msg.innerHTML='⚠️ '+err; msg.classList.add('show'); return; }
+  msg.classList.remove('show');
+  if(editingId){
+    const i=records.findIndex(r=>r.id===editingId);
+    if(i>-1) records[i]=Object.assign({}, records[i], rec);
+    toast('แก้ไขแล้ว ✓','ok');
+  } else {
+    rec.id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    records.push(rec); toast('บันทึกแล้ว ✓','ok');
+  }
+  recStore.write(records);
+  selectedMonth=rec.date.slice(0,7);
+  resetForm(); renderAll();
+}
+function startEdit(id){
+  const r=records.find(x=>x.id===id); if(!r) return;
+  editingId=id;
+  $('inDate').value=r.date;
+  setDayType(r.dayType||'normal');
+  $('inClockIn').value=r.clockIn||''; $('inClockOut').value=r.clockOut||'';
+  formBreaks=(r.breaks||[]).map(b=>({start:b.start,end:b.end})); renderBreaks();
+  cmpOn = !!(r.companyIn||r.companyOut); setCmp(cmpOn);
+  $('inCompanyIn').value=r.companyIn||''; $('inCompanyOut').value=r.companyOut||'';
+  $('inNote').value=r.note||'';
+  $('formCard').classList.add('is-editing');
+  $('formTitle').textContent='แก้ไขบันทึก'; $('formIcon').textContent='✏️';
+  $('saveBtn').innerHTML='💾 บันทึกการแก้ไข'; $('cancelBtn').style.display='';
+  updatePreview();
+  $('formCard').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function resetForm(){
+  editingId=null;
+  $('inClockIn').value=''; $('inClockOut').value=''; $('inNote').value='';
+  $('inCompanyIn').value=''; $('inCompanyOut').value='';
+  formBreaks=[]; renderBreaks();
+  cmpOn=false; setCmp(false);
+  setDayType('normal');
+  $('inDate').value=todayStr();
+  $('formCard').classList.remove('is-editing');
+  $('formTitle').textContent='เพิ่มบันทึกใหม่'; $('formIcon').textContent='➕';
+  $('saveBtn').innerHTML='💾 บันทึก'; $('cancelBtn').style.display='none';
+  $('formMsg').classList.remove('show');
+  updatePreview();
+}
+async function deleteRecord(id){
+  const r=records.find(x=>x.id===id); if(!r) return;
+  const ok=await confirmDialog({ icon:'🗑️', title:'ลบบันทึกนี้?', text:`${thaiDateShort(r.date)}\nการลบไม่สามารถย้อนกลับได้`, confirmText:'ลบ' });
+  if(!ok) return;
+  records=records.filter(x=>x.id!==id); recStore.write(records);
+  if(editingId===id) resetForm();
+  renderAll(); toast('ลบแล้ว','warn');
+}
+
+/* ============================================================================
+   10) Settings
+   ============================================================================ */
+function openSettings(){
+  const s=settings;
+  const ov=document.createElement('div'); ov.className='overlay'; ov.id='setOverlay';
+  ov.innerHTML=`<div class="modal">
+    <div class="set-head"><h3>⚙️ ตั้งค่า · 設定</h3><button class="set-close" id="setClose">✕</button></div>
+    <p class="set-sub">ตั้งให้ตรงกับกฎของบริษัท แล้วตัวเลขสรุปจะใกล้เคียงสลิปมากขึ้น</p>
+
+    <div class="set-group">
+      <label><span class="jp">所定労働時間</span>ชั่วโมงงานปกติต่อวัน</label>
+      <input type="text" id="setStd" value="${fmtHM(s.stdPerDayMin)}" placeholder="8:00">
+    </div>
+
+    <div class="set-group">
+      <label><span class="jp">残業の計算</span>วิธีคำนวณโอที</label>
+      <div class="radio-row" id="setOtMethod">
+        <div class="radio-opt ${s.otMethod==='daily'?'sel':''}" data-v="daily"><span class="dot"></span><span>เกินชั่วโมงปกติต่อวัน (เช่น เกิน 8 ชม./วัน)</span></div>
+        <div class="radio-opt ${s.otMethod==='monthly'?'sel':''}" data-v="monthly"><span class="dot"></span><span>เกินชั่วโมงมาตรฐานรายเดือน</span></div>
+      </div>
+    </div>
+
+    <div class="set-group">
+      <label><span class="jp">月間所定時間</span>ชั่วโมงมาตรฐานรายเดือน <span class="tip">(ใช้เมื่อเลือกแบบรายเดือน)</span></label>
+      <input type="text" id="setMonthly" value="${fmtHM(s.monthlyStdMin)}" placeholder="168:00">
+    </div>
+
+    <div class="set-group">
+      <label><span class="jp">時間の丸め</span>วิธีปัดเวลาทำงาน</label>
+      <select id="setRound">
+        <option value="0" ${s.rounding===0?'selected':''}>ไม่ปัด</option>
+        <option value="5" ${s.rounding===5?'selected':''}>ปัดลง 5 นาที</option>
+        <option value="15" ${s.rounding===15?'selected':''}>ปัดลง 15 นาที</option>
+        <option value="30" ${s.rounding===30?'selected':''}>ปัดลง 30 นาที</option>
+      </select>
+    </div>
+
+    <div class="set-group">
+      <label><span class="jp">深夜時間帯</span>ช่วงเวลากะดึก</label>
+      <div class="row2">
+        <input type="time" id="setNightStart" value="${fmtHM(s.nightStart)}">
+        <input type="time" id="setNightEnd" value="${fmtHM(s.nightEnd)}">
+      </div>
+    </div>
+
+    <div class="toggle"><span class="toggle-label">🌙 โหมดมืด (Dark mode)</span><span class="switch ${s.dark?'on':''}" id="setDark"></span></div>
+
+    <div class="btn-row" style="margin-top:18px">
+      <button class="btn btn-ghost" id="setCancel">ยกเลิก</button>
+      <button class="btn btn-primary" id="setSave">💾 บันทึกการตั้งค่า</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+
+  ov.querySelectorAll('#setOtMethod .radio-opt').forEach(o=>{
+    o.onclick=()=>{ ov.querySelectorAll('#setOtMethod .radio-opt').forEach(x=>x.classList.remove('sel')); o.classList.add('sel'); };
+  });
+  const darkSw=ov.querySelector('#setDark');
+  darkSw.onclick=()=>{ darkSw.classList.toggle('on'); document.documentElement.setAttribute('data-theme', darkSw.classList.contains('on')?'dark':'light'); };
+
+  const close=()=>{ ov.remove(); document.documentElement.setAttribute('data-theme', settings.dark?'dark':'light'); syncThemeBtn(); };
+  ov.querySelector('#setClose').onclick=close;
+  ov.querySelector('#setCancel').onclick=close;
+  ov.addEventListener('click',e=>{ if(e.target===ov) close(); });
+  ov.querySelector('#setSave').onclick=()=>{
+    settings.stdPerDayMin=parseHM(ov.querySelector('#setStd').value)||480;
+    settings.otMethod=ov.querySelector('#setOtMethod .radio-opt.sel').dataset.v;
+    settings.monthlyStdMin=parseHM(ov.querySelector('#setMonthly').value)||10080;
+    settings.rounding=parseInt(ov.querySelector('#setRound').value,10)||0;
+    settings.nightStart=parseHM(ov.querySelector('#setNightStart').value);
+    settings.nightEnd=parseHM(ov.querySelector('#setNightEnd').value);
+    settings.dark=darkSw.classList.contains('on');
+    setStore.write(settings);
+    document.documentElement.setAttribute('data-theme', settings.dark?'dark':'light');
+    syncThemeBtn(); ov.remove(); renderAll(); updatePreview();
+    toast('บันทึกการตั้งค่าแล้ว ✓','ok');
+  };
+}
+
+/* ============================================================================
+   11) Export CSV / สำรอง JSON / กู้ข้อมูล
+   ============================================================================ */
+function downloadBlob(blob, name){ const u=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(u); }
+function exportCSV(){
+  const recs=recsOfMonth(selectedMonth).slice().sort((a,b)=> a.date<b.date?-1:(a.date>b.date?1:(toMin(a.clockIn)??0)-(toMin(b.clockIn)??0)));
+  if(!recs.length){ toast('เดือนนี้ยังไม่มีข้อมูล','warn'); return; }
+  const q=s=>'"'+String(s).replace(/"/g,'""')+'"';
+  const head=['วันที่','วัน','ประเภทวัน(JP)','เข้างาน','เลิกงาน','พัก(นาที)','เวลารวม','ทำงานจริง','ชั่วโมงจริง','ปกติ','โอที','กะดึก','วันหยุด','บริษัทลงรวม','ส่วนต่าง(นาที)','ข้ามวัน','ต้องตรวจสอบ','หมายเหตุ'];
+  const a=aggregateMonth(recs, settings);
+  const rows=recs.map(r=>{ const c=computeDay(r,settings);
+    return [ r.date, D_SHORT[parseDate(r.date).getDay()], DT_JP[r.dayType],
+      r.clockIn||'-', r.clockOut||'-', c.breakMin, fmtHM(c.grossMin), fmtHM(c.actualMin), decHours(c.actualMin),
+      fmtHM(c.normalMin), fmtHM(c.otMin), fmtHM(c.nightMin), fmtHM(c.holidayMin),
+      c.companyGrossMin!=null?fmtHM(c.companyGrossMin):'-', c.diffMin!=null?c.diffMin:'-',
+      c.crossDay?'ใช่':'-', c.issues.length?'ใช่':'-', r.note||'' ].map(q).join(',');
+  });
+  const total=['รวมทั้งเดือน','','','','', a.breakT,'',fmtHM(a.actual),decHours(a.actual),fmtHM(a.normalTotal),fmtHM(a.otTotal),fmtHM(a.night),fmtHM(a.holiday),'',a.diffTotal,'','',''].map(q).join(',');
+  const csv='\uFEFF'+[head.map(q).join(','),...rows,'',total].join('\r\n');
+  downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8;'}), `บันทึกเวลา_${selectedMonth}.csv`);
+  toast('ดาวน์โหลด CSV แล้ว ✓','ok');
+}
+function exportJSON(){
+  if(!records.length){ toast('ยังไม่มีข้อมูลให้สำรอง','warn'); return; }
+  const d=new Date(),p=n=>String(n).padStart(2,'0');
+  const data={ app:'勤務ノート / บันทึกเวลาทำงาน', version:2, exportedAt:new Date().toISOString(), settings, records };
+  downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}), `backup_kinmu_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}.json`);
+  toast(`สำรอง ${records.length} รายการแล้ว ✓`,'ok');
+}
+function handleImport(file){
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=async ()=>{
+    let parsed, incoming;
+    try{ parsed=JSON.parse(reader.result); incoming=Array.isArray(parsed)?parsed:parsed.records; }
+    catch(e){ toast('อ่านไฟล์ไม่ได้','warn'); return; }
+    if(!Array.isArray(incoming)){ toast('ไฟล์ไม่มีข้อมูลรายการ','warn'); return; }
+    const valid=incoming.filter(r=>r&&r.date).map(r=>({
+      id:r.id||(Date.now().toString(36)+Math.random().toString(36).slice(2,6)),
+      date:r.date, dayType:r.dayType||'normal', clockIn:r.clockIn||'', clockOut:r.clockOut||'',
+      breaks:Array.isArray(r.breaks)?r.breaks:[], companyIn:r.companyIn||'', companyOut:r.companyOut||'', note:r.note||''
+    }));
+    if(!valid.length){ toast('ไม่พบรายการที่ถูกต้อง','warn'); return; }
+    const choice=await importChoice(valid.length, records.length);
+    if(!choice) return;
+    if(choice==='replace'){ records=valid; if(parsed.settings){ settings=Object.assign({}, DEFAULT_SETTINGS, parsed.settings); setStore.write(settings); document.documentElement.setAttribute('data-theme', settings.dark?'dark':'light'); syncThemeBtn(); } toast(`แทนที่ ${valid.length} รายการ ✓`,'ok'); }
+    else { const ids=new Set(records.map(r=>r.id)); let add=0,skip=0; valid.forEach(r=>{ if(ids.has(r.id))skip++; else{records.push(r);ids.add(r.id);add++;} }); toast(`นำเข้า ${add}${skip?` · ข้ามซ้ำ ${skip}`:''} ✓`,'ok'); }
+    recStore.write(records);
+    const months=[...new Set(records.map(r=>r.date.slice(0,7)))].sort();
+    if(months.length) selectedMonth=months[months.length-1];
+    renderAll();
+  };
+  reader.readAsText(file);
+}
+
+/* ============================================================================
+   11b) รายงาน PDF (วาด Canvas เอง + ประกอบไฟล์ PDF เองทีละไบต์ — ไม่พึ่งไลบรารีนอก)
+        ทุกช่องมีไทย + ญี่ปุ่นกำกับ เพื่อส่งแจ้งบริษัท
+   ============================================================================ */
+function roundRectPath(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function clipText(ctx,t,maxW){ if(ctx.measureText(t).width<=maxW) return t; let s=t; while(s.length>0 && ctx.measureText(s+'…').width>maxW) s=s.slice(0,-1); return s+'…'; }
+const F_TH="'Noto Sans Thai','Zen Maru Gothic',sans-serif";
+const F_JP="'Zen Maru Gothic','Noto Sans Thai',sans-serif";
+
+async function drawReportCanvas(recs){
+  if(document.fonts && document.fonts.ready){ try{ await document.fonts.ready; }catch(e){} }
+  const a=aggregateMonth(recs, settings);
+  const now=new Date(), p=n=>String(n).padStart(2,'0');
+  const gen=`${now.getFullYear()}-${p(now.getMonth()+1)}-${p(now.getDate())}`;
+
+  const BASE_W=760, SCALE=2, MARGIN=32;
+  const headH=34, rowH=21, totH=26;
+  const MAX_H = 220 + 130 + 30 + headH + recs.length*rowH + totH + 130;
+
+  const c1=document.createElement('canvas');
+  c1.width=Math.ceil(BASE_W*SCALE); c1.height=Math.ceil(MAX_H*SCALE);
+  const ctx=c1.getContext('2d'); ctx.scale(SCALE,SCALE);
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,BASE_W,MAX_H); ctx.textBaseline='alphabetic';
+
+  let y=MARGIN;
+  ctx.textAlign='left'; ctx.fillStyle='#1b1b1b';
+  ctx.font=`700 20px ${F_JP}`; ctx.fillText('勤務時間報告書', MARGIN, y+18);
+  ctx.font=`13px ${F_TH}`; ctx.fillStyle='#444'; ctx.fillText('รายงานบันทึกเวลาทำงาน', MARGIN, y+36);
+  ctx.textAlign='right'; ctx.font=`9px ${F_TH}`; ctx.fillStyle='#777';
+  ctx.fillText('対象月 / เดือน', BASE_W-MARGIN, y+8);
+  ctx.font=`700 15px ${F_JP}`; ctx.fillStyle='#1b1b1b'; ctx.fillText(thaiMonthLabel(selectedMonth), BASE_W-MARGIN, y+26);
+  ctx.font=`9px ${F_TH}`; ctx.fillStyle='#777'; ctx.fillText(`作成日 / ออกรายงาน: ${gen}`, BASE_W-MARGIN, y+40);
+  y+=50;
+  ctx.strokeStyle='#222'; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(MARGIN,y); ctx.lineTo(BASE_W-MARGIN,y); ctx.stroke();
+  y+=22;
+
+  const sumW=(BASE_W-2*MARGIN-3*8)/4, sumH=56;
+  [['出勤日数','วันทำงาน',`${a.workDays} วัน`,false],
+   ['実働時間','ทำงานจริง',fmtShort(a.actual),true],
+   ['残業時間','โอที',fmtShort(a.otTotal),false],
+   ['深夜時間','กะดึก',fmtShort(a.night),false]
+  ].forEach(([jp,th,val,hl],i)=>{
+    const bx=MARGIN+i*(sumW+8);
+    ctx.fillStyle= hl?'#F2FBF8':'#fafafa'; ctx.strokeStyle='#ccc'; ctx.lineWidth=1;
+    roundRectPath(ctx,bx,y,sumW,sumH,6); ctx.fill(); ctx.stroke();
+    ctx.textAlign='center';
+    ctx.font=`8px ${F_JP}`; ctx.fillStyle='#888'; ctx.fillText(jp,bx+sumW/2,y+14);
+    ctx.font=`9.5px ${F_TH}`; ctx.fillStyle='#666'; ctx.fillText(th,bx+sumW/2,y+27);
+    ctx.font=`700 16px ${F_TH}`; ctx.fillStyle= hl?'#0e8c76':'#1b1b1b'; ctx.fillText(val,bx+sumW/2,y+47);
+  });
+  y+=sumH+20;
+
+  const cols=[
+    {jp:'勤務日',th:'วันที่',w:88,a:'center'},
+    {jp:'種別',th:'ประเภท',w:64,a:'center'},
+    {jp:'出勤',th:'เข้า',w:50,a:'center'},
+    {jp:'退勤',th:'เลิก',w:54,a:'center'},
+    {jp:'休憩',th:'พัก',w:48,a:'center'},
+    {jp:'実働',th:'ทำงานจริง',w:74,a:'center'},
+    {jp:'残業',th:'OT',w:50,a:'center'},
+    {jp:'深夜',th:'กะดึก',w:54,a:'center'},
+    {jp:'備考',th:'หมายเหตุ',w:0,a:'left'},
+  ];
+  cols[8].w=(BASE_W-2*MARGIN)-cols.slice(0,8).reduce((s,c)=>s+c.w,0);
+  const tblX=MARGIN, tblW=BASE_W-2*MARGIN;
+  ctx.fillStyle='#efeef4'; ctx.fillRect(tblX,y,tblW,headH);
+  let hx=tblX;
+  cols.forEach(col=>{ const mid=hx+col.w/2; ctx.textAlign='center';
+    ctx.font=`8px ${F_JP}`; ctx.fillStyle='#777'; ctx.fillText(col.jp,mid,y+13);
+    ctx.font=`700 10px ${F_TH}`; ctx.fillStyle='#1b1b1b'; ctx.fillText(col.th,mid,y+26); hx+=col.w; });
+  ctx.strokeStyle='#c4c4c4'; ctx.lineWidth=1; ctx.strokeRect(tblX+0.5,y+0.5,tblW-1,headH-1);
+  hx=tblX; cols.forEach(col=>{ hx+=col.w; ctx.beginPath(); ctx.moveTo(hx,y); ctx.lineTo(hx,y+headH); ctx.stroke(); });
+  y+=headH;
+
+  const sorted=recs.slice().sort((x,z)=> x.date<z.date?-1:(x.date>z.date?1:(toMin(x.clockIn)??0)-(toMin(z.clockIn)??0)));
+  sorted.forEach(r=>{
+    const c=computeDay(r,settings);
+    const isLeave=r.dayType==='paid_leave';
+    const vals=[ r.date, DT_JP[r.dayType],
+      isLeave?'—':(r.clockIn||'—'),
+      isLeave?'—':((r.clockOut||'—')+(c.crossDay?' +1':'')),
+      isLeave?'—':(c.breakMin?fmtHM(c.breakMin):'—'),
+      isLeave?'有休':fmtHM(c.actualMin),
+      isLeave?'—':(c.otMin?fmtHM(c.otMin):'—'),
+      isLeave?'—':(c.nightMin?fmtHM(c.nightMin):'—'),
+      r.note||'' ];
+    ctx.strokeStyle='#dcdcdc'; ctx.strokeRect(tblX+0.5,y+0.5,tblW-1,rowH-1);
+    let cx=tblX;
+    cols.forEach((col,i)=>{
+      ctx.font = i===5 ? `700 10px ${F_TH}` : `10px ${F_TH}`;
+      ctx.fillStyle = i===5 ? '#0e8c76' : '#222';
+      if(col.a==='left'){ ctx.textAlign='left'; ctx.fillText(clipText(ctx,vals[i],col.w-8), cx+5, y+rowH/2+3.5); }
+      else { ctx.textAlign='center'; ctx.fillText(vals[i], cx+col.w/2, y+rowH/2+3.5); }
+      cx+=col.w;
+      if(i<cols.length-1){ ctx.strokeStyle='#ececec'; ctx.beginPath(); ctx.moveTo(cx,y); ctx.lineTo(cx,y+rowH); ctx.stroke(); }
+    });
+    y+=rowH;
+  });
+
+  ctx.fillStyle='#f6f6f6'; ctx.fillRect(tblX,y,tblW,totH);
+  ctx.strokeStyle='#c4c4c4'; ctx.strokeRect(tblX+0.5,y+0.5,tblW-1,totH-1);
+  const w5=cols.slice(0,5).reduce((s,c)=>s+c.w,0);
+  ctx.textAlign='left'; ctx.font=`700 10px ${F_TH}`; ctx.fillStyle='#1b1b1b';
+  ctx.fillText(`合計 / รวม (${a.workDays} วัน)`, tblX+6, y+totH/2+3.5);
+  ctx.textAlign='center'; ctx.fillStyle='#0e8c76'; ctx.fillText(fmtHM(a.actual), tblX+w5+cols[5].w/2, y+totH/2+3.5);
+  ctx.fillStyle='#1b1b1b'; ctx.fillText(fmtHM(a.otTotal), tblX+w5+cols[5].w+cols[6].w/2, y+totH/2+3.5);
+  ctx.fillText(fmtHM(a.night), tblX+w5+cols[5].w+cols[6].w+cols[7].w/2, y+totH/2+3.5);
+  let lx=tblX; [w5,cols[5].w,cols[6].w,cols[7].w].forEach(w=>{ lx+=w; ctx.strokeStyle='#c4c4c4'; ctx.beginPath(); ctx.moveTo(lx,y); ctx.lineTo(lx,y+totH); ctx.stroke(); });
+  y+=totH+16;
+
+  ctx.textAlign='left'; ctx.font=`9.5px ${F_TH}`; ctx.fillStyle='#555';
+  ctx.fillText(`所定内 ปกติ ${fmtHM(a.normalTotal)}   ·   日祝 วันหยุด ${fmtHM(a.holiday)}   ·   休憩 พักรวม ${fmtHM(a.breakT)}   ·   有休 ลา ${a.yukyu} วัน`, MARGIN, y+4); y+=18;
+  if(a.diffTotal!==0){ ctx.fillStyle='#c0392b';
+    ctx.fillText(`会社記録との差 ส่วนต่างจากเวลาที่บริษัทบันทึก: ${a.diffTotal>0?'+':''}${fmtHM(Math.abs(a.diffTotal))} ${a.diffTotal>0?'(ทำงานมากกว่าที่บริษัทลงไว้)':'(น้อยกว่าที่บริษัทลงไว้)'}`, MARGIN, y+4); y+=18; }
+  y+=14;
+
+  const sigW=150, s2x=BASE_W-MARGIN-sigW, s1x=s2x-40-sigW;
+  ctx.textAlign='center';
+  [[s1x,'本人署名 / ลายเซ็นพนักงาน'],[s2x,'確認者 / ผู้ตรวจสอบ']].forEach(([sx,lbl])=>{
+    ctx.strokeStyle='#333'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(sx,y+30); ctx.lineTo(sx+sigW,y+30); ctx.stroke();
+    ctx.font=`9.5px ${F_TH}`; ctx.fillStyle='#555'; ctx.fillText(lbl, sx+sigW/2, y+44);
+  });
+  y+=58;
+  ctx.strokeStyle='#eee'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(MARGIN,y); ctx.lineTo(BASE_W-MARGIN,y); ctx.stroke(); y+=14;
+  ctx.font=`8.5px ${F_TH}`; ctx.fillStyle='#aaa'; ctx.textAlign='center';
+  ctx.fillText('เอกสารสร้างจากบันทึกส่วนตัว (勤務ノート) เพื่อใช้อ้างอิง/ตรวจสอบ · ตัวเลขอาจต่างจากระบบบริษัทตามกฎปัดเวลา', BASE_W/2, y);
+  y+=20;
+
+  const finalPx=Math.ceil(y*SCALE);
+  const c2=document.createElement('canvas'); c2.width=c1.width; c2.height=finalPx;
+  c2.getContext('2d').drawImage(c1,0,0,c1.width,finalPx,0,0,c1.width,finalPx);
+  return c2;
+}
+
+function buildSimplePDF(canvas){
+  const mm2pt=2.8346456693, PW=210*mm2pt, PH=297*mm2pt;
+  const IW=PW, IH=canvas.height*(IW/canvas.width);
+  const N=Math.max(1, Math.ceil(IH/PH));
+  const jpeg=atob(canvas.toDataURL('image/jpeg',0.92).split(',')[1]);
+  let body='%PDF-1.4\n'; const off=[];
+  const add=s=>{ off.push(body.length); body+=s; };
+  const pStart=3, cStart=3+N, imgObj=3+2*N;
+  add(`1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n`);
+  const kids=[]; for(let i=0;i<N;i++) kids.push(`${pStart+i} 0 R`);
+  add(`2 0 obj\n<< /Type /Pages /Kids [${kids.join(' ')}] /Count ${N} >>\nendobj\n`);
+  for(let i=0;i<N;i++) add(`${pStart+i} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW.toFixed(2)} ${PH.toFixed(2)}] /Resources << /XObject << /Im0 ${imgObj} 0 R >> >> /Contents ${cStart+i} 0 R >>\nendobj\n`);
+  for(let i=0;i<N;i++){ const ty=(i+1)*PH-IH; const st=`q\n${IW.toFixed(2)} 0 0 ${IH.toFixed(2)} 0 ${ty.toFixed(2)} cm\n/Im0 Do\nQ`;
+    add(`${cStart+i} 0 obj\n<< /Length ${st.length} >>\nstream\n${st}\nendstream\nendobj\n`); }
+  add(`${imgObj} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${canvas.width} /Height ${canvas.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.length} >>\nstream\n${jpeg}\nendstream\nendobj\n`);
+  const xo=body.length, T=imgObj;
+  let xref=`xref\n0 ${T+1}\n0000000000 65535 f \n`;
+  for(let n=1;n<=T;n++) xref+=String(off[n-1]).padStart(10,'0')+' 00000 n \n';
+  body+=xref+`trailer\n<< /Size ${T+1} /Root 1 0 R >>\nstartxref\n${xo}\n%%EOF`;
+  const bytes=new Uint8Array(body.length); for(let i=0;i<body.length;i++) bytes[i]=body.charCodeAt(i)&0xFF;
+  return bytes;
+}
+
+let pdfBusy=false;
+async function generatePDF(){
+  if(pdfBusy) return;
+  const recs=recsOfMonth(selectedMonth);
+  if(!recs.length){ toast('เดือนนี้ยังไม่มีข้อมูลให้ออกรายงาน','warn'); return; }
+  pdfBusy=true;
+  const btn=$('pdfBtn'); const o=btn.innerHTML; btn.style.opacity='.6'; btn.innerHTML='<span class="t-ic">⏳</span>กำลังสร้าง...';
+  try{
+    const canvas=await drawReportCanvas(recs);
+    downloadBlob(new Blob([buildSimplePDF(canvas)],{type:'application/pdf'}), `รายงานเวลาทำงาน_${selectedMonth}.pdf`);
+    toast('ดาวน์โหลด PDF แล้ว ✓','ok');
+  }catch(err){ console.error('PDF error:',err); toast('สร้าง PDF ไม่สำเร็จ ลองอีกครั้ง','warn'); }
+  finally{ btn.innerHTML=o; btn.style.opacity=''; pdfBusy=false; }
+}
+
+/* ============================================================================
+   12) Modal + Toast
+   ============================================================================ */
+function confirmDialog({icon='❓',title='ยืนยัน?',text='',confirmText='ตกลง',cancelText='ยกเลิก'}){
+  return new Promise(res=>{
+    const ov=document.createElement('div'); ov.className='overlay';
+    ov.innerHTML=`<div class="modal center"><div class="m-ic">${icon}</div><h3>${title}</h3><p>${text.replace(/\n/g,'<br>')}</p>
+      <div class="modal-btns"><button class="btn btn-cancel" data-no>${cancelText}</button><button class="btn btn-danger" data-yes>${confirmText}</button></div></div>`;
+    document.body.appendChild(ov);
+    const close=v=>{ ov.remove(); res(v); };
+    ov.querySelector('[data-yes]').onclick=()=>close(true);
+    ov.querySelector('[data-no]').onclick=()=>close(false);
+    ov.addEventListener('click',e=>{ if(e.target===ov) close(false); });
+  });
+}
+function importChoice(inc, exist){
+  return new Promise(res=>{
+    const ov=document.createElement('div'); ov.className='overlay';
+    ov.innerHTML=`<div class="modal center"><div class="m-ic">📥</div><h3>กู้ข้อมูล</h3>
+      <p>พบ <b>${inc}</b> รายการในไฟล์ · ตอนนี้มี <b>${exist}</b> รายการ</p>
+      <div class="modal-btns" style="flex-direction:column">
+        <button class="btn btn-primary" data-merge>รวมกับข้อมูลเดิม</button>
+        <button class="btn btn-danger" data-replace>แทนที่ทั้งหมด</button>
+        <button class="btn btn-cancel" data-cancel>ยกเลิก</button>
+      </div></div>`;
+    document.body.appendChild(ov);
+    const close=v=>{ ov.remove(); res(v); };
+    ov.querySelector('[data-merge]').onclick=()=>close('merge');
+    ov.querySelector('[data-replace]').onclick=()=>close('replace');
+    ov.querySelector('[data-cancel]').onclick=()=>close(null);
+    ov.addEventListener('click',e=>{ if(e.target===ov) close(null); });
+  });
+}
+let toastTimer;
+function toast(msg,type=''){ const t=$('toast'); t.textContent=msg; t.className='show '+type; clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.className='',2300); }
+
+/* ============================================================================
+   13) Dark mode + Cmp toggle + month nav
+   ============================================================================ */
+function syncThemeBtn(){ $('themeBtn').textContent = settings.dark ? '☀️' : '🌙'; }
+function toggleTheme(){ settings.dark=!settings.dark; setStore.write(settings); document.documentElement.setAttribute('data-theme', settings.dark?'dark':'light'); syncThemeBtn(); }
+function setCmp(on){ cmpOn=on; $('cmpSwitch').classList.toggle('on',on); $('cmpFields').style.display=on?'block':'none'; }
+function shiftMonth(d){ let [y,m]=selectedMonth.split('-').map(Number); m+=d; if(m<1){m=12;y--;} if(m>12){m=1;y++;} selectedMonth=`${y}-${String(m).padStart(2,'0')}`; renderAll(); }
+
+/* ============================================================================
+   14) เรนเดอร์ทั้งหมด + ผูก event
+   ============================================================================ */
+function renderAll(){ renderSummary(); renderHistory(); }
+
+$('prevM').onclick=()=>shiftMonth(-1);
+$('nextM').onclick=()=>shiftMonth(1);
+$('monthInput').onchange=()=>{ if($('monthInput').value){ selectedMonth=$('monthInput').value; renderAll(); } };
+$('themeBtn').onclick=toggleTheme;
+$('settingsBtn').onclick=openSettings;
+$('payslipHead').onclick=()=>$('payslip').classList.toggle('collapsed');
+
+document.querySelectorAll('.daytype').forEach(b=> b.onclick=()=>setDayType(b.dataset.t));
+$('addBreakBtn').onclick=()=>{ formBreaks.push({start:'',end:''}); renderBreaks(); };
+$('cmpSwitch').onclick=()=>setCmp(!cmpOn);
+['inClockIn','inClockOut','inCompanyIn','inCompanyOut'].forEach(id=>$(id).addEventListener('input',updatePreview));
+
+$('saveBtn').onclick=saveRecord;
+$('cancelBtn').onclick=resetForm;
+$('exportBtn').onclick=exportCSV;
+$('pdfBtn').onclick=generatePDF;
+$('backupBtn').onclick=exportJSON;
+$('importBtn').onclick=()=>$('importFile').click();
+$('importFile').addEventListener('change',e=>{ handleImport(e.target.files[0]); e.target.value=''; });
+
+$('historyList').addEventListener('click',e=>{
+  const ed=e.target.closest('[data-edit]'), dl=e.target.closest('[data-del]');
+  if(ed) startEdit(ed.dataset.edit);
+  if(dl) deleteRecord(dl.dataset.del);
+});
+
+// เริ่มต้น
+document.documentElement.setAttribute('data-theme', settings.dark?'dark':'light');
+syncThemeBtn();
+$('inDate').value=todayStr();
+setDayType('normal');
+renderBreaks();
+updatePreview();
+renderAll();
+</script>
+</body>
+</html>
